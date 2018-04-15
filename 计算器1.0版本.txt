@@ -1,0 +1,245 @@
+counter.h
+#pragma once
+#pragma once
+#include<iostream>
+#include<cmath>
+using namespace std;
+template <class DATA>
+class Stack
+{
+public:
+	Stack(int ncount = 10)//带默认参数的构造函数
+	{
+		pDate = new DATA[ncount];
+		top = -1;
+		count = ncount;
+	}
+	bool push(const DATA& date)//入栈函数
+	{
+		if (isFull())
+		{
+			cout << "栈已满！";
+			return false;
+		}
+		else
+		{
+			pDate[++top] = date;
+			return true;
+		}
+	}
+	bool pop(DATA &e)//出栈函数
+	{
+		if (isEmpty())
+			return false;
+		else
+		{
+			e = pDate[top--];
+			return true;
+		}
+	}
+	bool isFull()//判断栈是否已满
+	{
+		if (top + 1 >= count)
+			return true;
+		else
+			return false;
+	}
+	DATA peek()//取栈顶元素
+	{
+		if (isEmpty())
+			return false;
+		else
+			return pDate[top];
+	}
+	bool isEmpty()//判断栈是否为空
+	{
+		if (top == -1)
+			return true;
+		else
+			return false;
+	}
+private:
+	DATA * pDate;
+	int top;
+	int count;
+
+};
+
+
+main
+#include"counter.h"
+
+using namespace std;
+//检测括号是否匹配
+bool check_brackets(char s[])
+{
+	int i = 0, flog = 0;
+	while (s[i] != '\0')
+	{
+		if (s[i] == '(')
+			flog++;
+		else if (s[i] == ')')
+				flog--;
+		i++;
+	}
+	if (flog == 0)
+		return true;
+	else
+		return false;
+}
+//判断元素是否为运算符
+bool judgement_operator(char ch)
+{
+	int i;
+	char oper[7] = { '+','-','*','/','(',')','=' };
+	for (i = 0; i < 7; i++)
+	{
+		if (ch == oper[i])
+			return true;
+	}
+	return false;
+}
+//确定两个运算符的优先级
+char determine_priority(char a, char b)
+{
+	char prio[8][8] = {
+		{' ','+','-','*','/','(',')','='},
+		{'+','>','>','<','<','<','>','>'},
+		{'-','>','>','<','<','<','>','>'},
+		{'*','>','>','>','>','<','>','>'},
+		{'/','>','>','>','>','<','>','>'},
+		{'(','<','<','<','<','<','=',' '},
+		{')','>','>','>','>',' ','>','>'},
+		{'=','<','<','<','<','<',' ','='}
+	};
+	int i,j;
+	for (i = 0; i < 8; i++)
+	{
+		if (prio[0][i] == a)
+			break;
+	}
+	for (j = 0; j < 8; j++)
+	{
+		if (prio[j][0] == b)
+			break;
+	}
+	return prio[j][i];
+}
+//计算二元表达式的结果
+bool computing_result(double a, char oper, double b, double &c)
+{
+	if (oper == '+')
+		c = a + b;
+	else if (oper == '-')
+		c = a - b;
+	else if (oper == '*')
+		c = a * b;
+	else
+	{
+		if (fabs(b) < 1e-8)
+			return false;
+		else
+			c = a / b;
+	}
+	return true;
+}
+//计算表达式结果
+bool calculate(char s[], double &r)
+{
+	int i=0,j,m;
+	double num,e1,e2,a,result;
+	char ptr;
+	Stack<double> num_stack;//数字栈
+	Stack<char> opre_stack;//运算符栈
+	opre_stack.push('=');
+	while (s[i] != '=' || opre_stack.peek() != '=')
+	{
+		num = 0;
+		if (s[i] >= '0'&&s[i] <= '9')
+		{
+			num = s[i] - 48;
+			j =m =i + 1;
+			while (!judgement_operator(s[j]))
+			{
+				num = num * 10 + s[j] - 48;
+				j++;
+				m++;
+			}
+			
+			num_stack.push(num);
+			i=m;
+		}
+		else
+		{
+			if (judgement_operator(s[i]))
+			{
+				switch (determine_priority(s[i], opre_stack.peek()))
+				{
+				case '<':
+					opre_stack.push(s[i++]);
+					break;
+				case '=':
+					opre_stack.pop(ptr);
+					i++;
+					break;
+				case '>':
+					num_stack.pop(e1);
+					num_stack.pop(e2);
+					if (computing_result(e2, opre_stack.peek(), e1, a))
+					{
+						opre_stack.pop(ptr);
+						num_stack.push(a);
+					}
+					else
+						return false;
+					break;
+
+				}
+			}
+		}
+	}
+	num_stack.pop(r);
+	return true;
+
+}
+int main()
+{
+	int i,j;
+	double result;
+	char s1[200],s2[200];
+	printf("\t\t表达式求值（栈）\n");
+	printf("******************************************************************\n");
+	printf("请输入表达式，等号不用输入：\n");
+	while (gets_s(s1) != NULL)
+	{
+		if (strlen(s1) == 1 || s1[0] == 0)
+			break;
+		for (i = 0, j = 0; s1[i] != 0; i++) { //将表达式转换为规格化的表达式，并在末尾加上“=”，保存在s2中
+
+			if (s1[i] == ' ')
+
+				continue;
+
+			s2[j++] = s1[i];
+
+		}
+
+		s2[j++] = '=';
+
+		s2[j] = '\0';
+		if (check_brackets(s2))
+		{
+			if (calculate(s2, result))
+				cout << result << endl;
+			else
+				cout << "除数不能为0" << endl;
+		}
+		else
+			cout<<"括号不匹配"<<endl;
+
+	}
+	return 0;
+}
+PS:网上找的做了些可见修改
+自己写的失败了两个版本，一直不满意，改到我满意了再补上吧，估计会有一个垃圾的版本
+和一个牛皮的版本
