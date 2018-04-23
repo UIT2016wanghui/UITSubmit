@@ -1,0 +1,43 @@
+#pragma once
+#include<stdio.h>
+#include<iostream>
+using namespace std;
+class node {
+public:
+	char s;
+	node *next;
+	node(char c) { s = c; };
+};
+class stack {
+public:
+	float i = 0;
+	node *top;
+	void newstack(char c);
+	void push(char c);
+	char topp();
+	char pop();
+};
+void stack::newstack(char c)
+{
+	node *x = new(node)(c);
+	top= x;
+}
+void stack::push(char c)
+{
+	node *y = new(node)(c);
+	y->next = top;
+	top = y;
+}
+char stack::topp()
+{
+	char c;
+	c = top->s;
+	return c;
+}
+char stack::pop()
+{
+	char c;
+	c = top->s;
+	top = top->next;
+	return c;
+}
